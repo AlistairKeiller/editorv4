@@ -23,9 +23,7 @@
   import lld from '$lib/lld.mjs';
 
 	// wasi imports
-	import { init, WASI } from '@wasmer/wasi';
-	import { Buffer } from 'buffer'
-	globalThis.Buffer = Buffer
+	import { runWasix, init } from "@wasmer/sdk";
 	
 	// terminal preDOM setup
 	let terminal: HTMLElement;
@@ -160,23 +158,9 @@
 		l.callMain(["-L/wasi-sysroot/lib/wasm32-wasi/","/wasi-sysroot/lib/wasi/libclang_rt.builtins-wasm32.a", "/wasi-sysroot/lib/wasm32-wasi/crt1.o", "m.o", "-lc", "-lc++", "-lc++abi",'-o', 'm.wasm']);
 
 		await init();
-		let wasi = new WASI({});
-		const module = await WebAssembly.compile(l.FS.readFile('m.wasm'));
-		await wasi.instantiate(module, {});
-		let exitCode = wasi.start();
-		let stdout = wasi.getStdoutString();
-		console.log(`${stdout}(exit code: ${exitCode})`);
-
-		// var data = l.FS.readFile('m.wasm', { encoding: 'binary' });
-		// var blob = new Blob([data], { type: 'application/octet-stream' });
-		// var url = URL.createObjectURL(blob);
-		// var a = document.createElement('a');
-		// a.href = url;
-		// a.download = 'm.wasm';
-		// document.body.appendChild(a);
-		// a.click();
-		// document.body.removeChild(a);
-		// URL.revokeObjectURL(url);
+		const instance = await runWasix(await WebAssembly.compile(l.FS.readFile('m.wasm')), {});
+		const result = await instance.wait();
+		console.log(result.stdout)
   };
 
   main();
