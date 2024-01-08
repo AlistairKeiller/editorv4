@@ -127,9 +127,36 @@
 			fitAddon.fit();
 		};
 
-  async function main() {
-		var c = await clang();
-		var l = await lld(); // need to set thisProgram=wasm-ld in lld.mjs or TODO: somewhere in this file
+
+	async function ready() {
+		let c = await clang();
+		let l = await lld();
+		await init();
+		const encoder = new TextEncoder();
+		buttonState = 'ready';
+
+		readyClicked = async function () {
+			buttonState = 'running';
+			xterm.reset();
+			c.FS.writeFile("m.cpp", view.state.doc.toString())
+			c.callMain(["-cc1", "-emit-obj", "-disable-free", "-fcolor-diagnostics", "-I", "/wasi-sysroot/include/c++/v1", "-I", "/wasi-sysroot/include", "-I", "/wasi-sysroot/lib/clang/18/include", "-Oz", "m.cpp", "-o", "m.o", "-x", "c++"]);
+
+			l.FS.writeFile('m.o', c.FS.readFile('m.o'));
+			l.callMain(["-L/wasi-sysroot/lib/wasm32-wasi/","/wasi-sysroot/lib/wasi/libclang_rt.builtins-wasm32.a", "/wasi-sysroot/lib/wasm32-wasi/crt1.o", "m.o", "-lc", "-lc++", "-lc++abi",'-o', 'm.wasm']);
+			const instance = await runWasix(await WebAssembly.compile(l.FS.readFile('m.wasm')), {});
+			const stdin = instance.stdin?.getWriter();
+			xterm.onData(data => stdin?.write(encoder.encode(data)));
+			instance.stdout.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
+			instance.stderr.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
+			await instance.wait();
+			buttonState = 'ready';
+		}
+	}
+	ready();
+
+  // async function main() {
+		// var c = await clang();
+		// var l = await lld(); // need to set thisProgram=wasm-ld in lld.mjs or TODO: somewhere in this file
 
 		// const sysroot = await fetch("/wasi-sysroot.tar");
 
@@ -150,24 +177,24 @@
 
 		// console.log(c.FS.readdir("/Users/alistairkeiller/svelte/"))
 
-		c.FS.writeFile("m.cpp", "#include<iostream>\nint main(){std::cout << \"test\";}")
-		c.callMain(["-cc1", "-emit-obj", "-disable-free", "-fcolor-diagnostics", "-I", "/wasi-sysroot/include/c++/v1", "-I", "/wasi-sysroot/include", "-I", "/wasi-sysroot/lib/clang/18/include", "-Oz", "m.cpp", "-o", "m.o", "-x", "c++"]);
+		// c.FS.writeFile("m.cpp", "#include<iostream>\nint main(){std::cout << \"test\";}")
+		// c.callMain(["-cc1", "-emit-obj", "-disable-free", "-fcolor-diagnostics", "-I", "/wasi-sysroot/include/c++/v1", "-I", "/wasi-sysroot/include", "-I", "/wasi-sysroot/lib/clang/18/include", "-Oz", "m.cpp", "-o", "m.o", "-x", "c++"]);
 
-		l.FS.writeFile('m.o', c.FS.readFile('m.o'));
-		l.callMain(["-L/wasi-sysroot/lib/wasm32-wasi/","/wasi-sysroot/lib/wasi/libclang_rt.builtins-wasm32.a", "/wasi-sysroot/lib/wasm32-wasi/crt1.o", "m.o", "-lc", "-lc++", "-lc++abi",'-o', 'm.wasm']);
+		// l.FS.writeFile('m.o', c.FS.readFile('m.o'));
+		// l.callMain(["-L/wasi-sysroot/lib/wasm32-wasi/","/wasi-sysroot/lib/wasi/libclang_rt.builtins-wasm32.a", "/wasi-sysroot/lib/wasm32-wasi/crt1.o", "m.o", "-lc", "-lc++", "-lc++abi",'-o', 'm.wasm']);
 
-		await init();
-		const instance = await runWasix(await WebAssembly.compile(l.FS.readFile('m.wasm')), {});
-		const encoder = new TextEncoder();
-		const stdin = instance.stdin?.getWriter();
-		xterm.onData(data => stdin?.write(encoder.encode(data)));
-		instance.stdout.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
-		instance.stderr.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
-		// const result = await instance.wait();
-		// console.log(result.stdout)
-  };
+		// await init();
+		// const instance = await runWasix(await WebAssembly.compile(l.FS.readFile('m.wasm')), {});
+		// const encoder = new TextEncoder();
+		// const stdin = instance.stdin?.getWriter();
+		// xterm.onData(data => stdin?.write(encoder.encode(data)));
+		// instance.stdout.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
+		// instance.stderr.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
+		// // const result = await instance.wait();
+		// // console.log(result.stdout)
+  // };
 
-  main();
+  // main();
 	});
 </script>
 
