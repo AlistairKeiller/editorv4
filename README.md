@@ -1,3 +1,4 @@
+```
     Basicly All Native (BAN) is a C++ IDE that attempts to combine the
     power of a full fledged a editor with the ease of use of the browser
 
@@ -11,3 +12,4 @@
  │  Works on any modern browser             Anyone can use BSC                │
  │                                                                            │
  └────────────────────────────────────────────────────────────────────────────┘
+```
