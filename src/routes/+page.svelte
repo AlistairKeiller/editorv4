@@ -152,8 +152,9 @@
   async function main() {
 		var c = await clang();
 		var l = await lld(); // need to set thisProgram=wasm-ld in lld.mjs or TODO: somewhere in this file
+
 		// const sysroot = await fetch("/wasi-sysroot.tar");
-		// const sysroot = await fetch("/sysroot.tar");
+
 		// const buffer = await sysroot.arrayBuffer();
 		// await untar(buffer).then(function(extractedFiles) {
 		// 	extractedFiles.forEach(function(file) {
@@ -168,12 +169,29 @@
 		// 		}
 		// 	})
 		// })
-		// c.FS.writeFile("m.cpp", "int main(){return 0;}")
-		// c.callMain(["-cc1", "-emit-obj", "-disable-free", "-fcolor-diagnostics", "-I", "/wasi-sysroot/include/c++/v1", "-I", "/wasi-sysroot/include", "-I", "/wasi-sysroot/lib/clang/18/include", "m.cpp"]);
-		// c.callMain(["-cc1", "-emit-obj", "-disable-free", "-fcolor-diagnostics", "-I", "/include/c++/v1", "-I", "/include", "-I", "/lib/clang/18/include", "m.cpp"]);
+
+		// console.log(c.FS.readdir("/Users/alistairkeiller/svelte/"))
+
+		c.FS.writeFile("m.cpp", "int main(){return 0;}")
+		c.callMain(["-cc1", "-emit-obj", "-disable-free", "-fcolor-diagnostics", "-I", "/Users/alistairkeiller/svelte/wasi-sysroot/include/c++/v1", "-I", "/Users/alistairkeiller/svelte/wasi-sysroot/include", "-I", "/Users/alistairkeiller/svelte/wasi-sysroot/lib/clang/18/include", "-Oz", "m.cpp", "-o", "m.o", "-x", "c++"]);
+
+		// var data = c.FS.readFile('m.o', { encoding: 'binary' });
+		// var blob = new Blob([data], { type: 'application/octet-stream' });
+		// var url = URL.createObjectURL(blob);
+		// var a = document.createElement('a');
+		// a.href = url;
+		// a.download = 'm.o';
+		// document.body.appendChild(a);
+		// a.click();
+		// document.body.removeChild(a);
+		// URL.revokeObjectURL(url);
+
+	
 		// console.log(c.FS.readFile('m.o'))
-		// l.FS.writeFile('m.o', c.FS.readFile('m.o'));
-		// l.callMain(["/wasi-sysroot/lib/wasm32-wasi/crt1.o", "m.o", '-o', 'm.wasm']);
+
+		l.FS.writeFile('m.o', c.FS.readFile('m.o'));
+		// l.callMain(["--no-entry","--export-dynamic", "-z", "stack-size=1048576","-L/Users/alistairkeiller/svelte/wasi-sysroot/lib/wasm32-wasi/", "/Users/alistairkeiller/svelte/wasi-sysroot/lib/wasm32-wasi/crt1.o", "m.o", "-lc", "-lc++", "-lc++abi",'-o', 'm.wasm']);
+		l.callMain(["--no-entry","--verbose", "m.o", "-o", "m.wasm"])
 		// l.callMain(["/lib/wasm32-wasi/crt1.o", "m.o", '-o', 'm.wasm']);
   };
 
