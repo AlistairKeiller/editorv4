@@ -130,27 +130,6 @@
 		};
 
 
-  // async function main() {
-  //   await init({
-  //     // The path to the wasm resources
-  //     path: 'https://cdn.jsdelivr.net/npm/clang.js/dist',
-  //   });
-
-  //   const code = `
-  //     #include <iostream>
-  //     using namespace std;
-
-  //     int fib(int n) {
-  //       if (n < 2) return n;
-  //       return fib(n-1) + fib(n-2);
-  //     }
-
-  //     int main() {
-  //       cout << "fib(10) = " << fib(10) << endl;
-  //     }`;
-  
-  //   run(code);
-  // };
   async function main() {
 		var c = await clang();
 		var l = await lld(); // need to set thisProgram=wasm-ld in lld.mjs or TODO: somewhere in this file
@@ -174,15 +153,19 @@
 
 		// console.log(c.FS.readdir("/Users/alistairkeiller/svelte/"))
 
-		// c.FS.writeFile("m.cpp", "#include<iostream>\nint main(){std::cout << \"test\";}")
-		c.FS.writeFile("m.cpp", "int main(){}")
+		c.FS.writeFile("m.cpp", "#include<iostream>\nint main(){std::cout << \"test\";}")
 		c.callMain(["-cc1", "-emit-obj", "-disable-free", "-fcolor-diagnostics", "-I", "/wasi-sysroot/include/c++/v1", "-I", "/wasi-sysroot/include", "-I", "/wasi-sysroot/lib/clang/18/include", "-Oz", "m.cpp", "-o", "m.o", "-x", "c++"]);
 
 		l.FS.writeFile('m.o', c.FS.readFile('m.o'));
-		// l.callMain(["-L/wasi-sysroot/lib/wasm32-wasi/","-l/wasi-sysroot/lib/wasi/libclang_rt.builtins-wasm32.a", "/wasi-sysroot/lib/wasm32-wasi/crt1.o", "m.o", "-lc", "-lc++", "-lc++abi",'-o', 'm.wasm']);
+		l.callMain(["-L/wasi-sysroot/lib/wasm32-wasi/","/wasi-sysroot/lib/wasi/libclang_rt.builtins-wasm32.a", "/wasi-sysroot/lib/wasm32-wasi/crt1.o", "m.o", "-lc", "-lc++", "-lc++abi",'-o', 'm.wasm']);
 
 		await init();
 		let wasi = new WASI({});
+		const module = await WebAssembly.compile(l.FS.readFile('m.wasm'));
+		await wasi.instantiate(module, {});
+		let exitCode = wasi.start();
+		let stdout = wasi.getStdoutString();
+		console.log(`${stdout}(exit code: ${exitCode})`);
 
 		// var data = l.FS.readFile('m.wasm', { encoding: 'binary' });
 		// var blob = new Blob([data], { type: 'application/octet-stream' });
