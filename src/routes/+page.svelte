@@ -71,11 +71,9 @@
 		});
 
 		// xterm DOM setup
-		const [{ Terminal }, { FitAddon }, { WebglAddon }] = await Promise.all([
-			import('xterm'),
-			import('xterm-addon-fit'),
-			import('xterm-addon-webgl')
-		]);
+		const { Terminal } = await import('xterm');
+		const { FitAddon } = await import('xterm-addon-fit');
+		const { WebglAddon } = await import('xterm-addon-webgl');
 		const xterm = new Terminal({
 			theme: {
 				// theme from https://github.com/Binaryify/OneDark-Pro/blob/master/src/themes/data/oneDarkPro.ts
@@ -128,7 +126,6 @@
 		};
 
 
-	async function ready() {
 		let c = await clang();
 		let l = await lld();
 		await init();
@@ -151,8 +148,6 @@
 			await instance.wait();
 			buttonState = 'ready';
 		}
-	}
-	ready();
 
   // async function main() {
 		// var c = await clang();
