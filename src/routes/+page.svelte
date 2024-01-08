@@ -127,7 +127,6 @@
 			fitAddon.fit();
 		};
 
-
   async function main() {
 		var c = await clang();
 		var l = await lld(); // need to set thisProgram=wasm-ld in lld.mjs or TODO: somewhere in this file
@@ -159,8 +158,13 @@
 
 		await init();
 		const instance = await runWasix(await WebAssembly.compile(l.FS.readFile('m.wasm')), {});
-		const result = await instance.wait();
-		console.log(result.stdout)
+		const encoder = new TextEncoder();
+		const stdin = instance.stdin?.getWriter();
+		xterm.onData(data => stdin?.write(encoder.encode(data)));
+		instance.stdout.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
+		instance.stderr.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
+		// const result = await instance.wait();
+		// console.log(result.stdout)
   };
 
   main();
