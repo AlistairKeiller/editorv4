@@ -126,8 +126,15 @@
 		};
 
 
-		let c = await clang();
-		let l = await lld();
+		let c = await clang({
+			'print': function(text) { xterm.writeln(text) },
+			'printErr': function(text) { xterm.writeln(text) }
+		});
+		let l = await lld({
+			"thisProgram": "wasm-ld",
+			'print': function(text) { xterm.writeln(text) },
+			'printErr': function(text) { xterm.writeln(text) }
+		});
 		await init();
 		const encoder = new TextEncoder();
 		buttonState = 'ready';
