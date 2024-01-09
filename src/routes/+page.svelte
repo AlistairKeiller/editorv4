@@ -36,14 +36,15 @@
 	let buttonState = 'loading';
 	let readyClicked = function () {};
 
-	 // Yjs setup
-  const ydoc = new Y.Doc();
-  const provider = new WebrtcProvider('secret_key', ydoc);
-  const ytext = ydoc.getText('codemirror');
-	const undoManager = new Y.UndoManager(ytext)
 
 	// DOM setup
 	onMount(async () => {
+		 // Yjs setup
+	  const ydoc = new Y.Doc();
+	  const provider = new WebrtcProvider('secret_key', ydoc);
+	  const ytext = ydoc.getText('codemirror');
+		const undoManager = new Y.UndoManager(ytext)
+
 		// codemirror DOM setup
 		const view = new EditorView({
 			state: EditorState.create({
@@ -167,49 +168,7 @@
 			await instance.wait();
 			buttonState = 'ready';
 		}
-
-  // async function main() {
-		// var c = await clang();
-		// var l = await lld(); // need to set thisProgram=wasm-ld in lld.mjs or TODO: somewhere in this file
-
-		// const sysroot = await fetch("/wasi-sysroot.tar");
-
-		// const buffer = await sysroot.arrayBuffer();
-		// await untar(buffer).then(function(extractedFiles) {
-		// 	extractedFiles.forEach(function(file) {
-		// 		// console.log(file)
-		// 		if (file.buffer.byteLength == 0) {
-		// 			c.FS.mkdir(file.name)
-		// 			l.FS.mkdir(file.name)
-		// 		}
-		// 		else {
-		// 			c.FS.writeFile(file.name, new Uint8Array(file.buffer))
-		// 			l.FS.writeFile(file.name, new Uint8Array(file.buffer))
-		// 		}
-		// 	})
-		// })
-
-		// console.log(c.FS.readdir("/Users/alistairkeiller/svelte/"))
-
-		// c.FS.writeFile("m.cpp", "#include<iostream>\nint main(){std::cout << \"test\";}")
-		// c.callMain(["-cc1", "-emit-obj", "-disable-free", "-fcolor-diagnostics", "-I", "/wasi-sysroot/include/c++/v1", "-I", "/wasi-sysroot/include", "-I", "/wasi-sysroot/lib/clang/18/include", "-Oz", "m.cpp", "-o", "m.o", "-x", "c++"]);
-
-		// l.FS.writeFile('m.o', c.FS.readFile('m.o'));
-		// l.callMain(["-L/wasi-sysroot/lib/wasm32-wasi/","/wasi-sysroot/lib/wasi/libclang_rt.builtins-wasm32.a", "/wasi-sysroot/lib/wasm32-wasi/crt1.o", "m.o", "-lc", "-lc++", "-lc++abi",'-o', 'm.wasm']);
-
-		// await init();
-		// const instance = await runWasix(await WebAssembly.compile(l.FS.readFile('m.wasm')), {});
-		// const encoder = new TextEncoder();
-		// const stdin = instance.stdin?.getWriter();
-		// xterm.onData(data => stdin?.write(encoder.encode(data)));
-		// instance.stdout.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
-		// instance.stderr.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
-		// // const result = await instance.wait();
-		// // console.log(result.stdout)
-  // };
-
-  // main();
-	});
+});
 </script>
 
 <style>
