@@ -131,41 +131,43 @@
 		buttonState = 'ready';
 
 		readyClicked = async function () {
-			buttonState = 'running';
-			xterm.reset();
-		let c = await clang({
-			'print': function(text) { xterm.writeln(text) },
-			'printErr': function(text) { xterm.writeln(text) }
-		});
-			c.FS.writeFile("m.cpp", view.state.doc.toString())
-			c.callMain(["-cc1", "-emit-obj", "-disable-free", "-fcolor-diagnostics", "-I", "/wasi-sysroot/include/c++/v1", "-I", "/wasi-sysroot/include", "-I", "/wasi-sysroot/lib/clang/18/include", "-Oz", "m.cpp", "-o", "m.o", "-x", "c++"]);
-
-		let l = await lld({
-			"thisProgram": "wasm-ld",
-			'print': function(text) { xterm.writeln(text) },
-			'printErr': function(text) { xterm.writeln(text) }
-		});
-			l.FS.writeFile('m.o', c.FS.readFile('m.o'));
-			l.callMain(["-L/wasi-sysroot/lib/wasm32-wasi/","/wasi-sysroot/lib/wasi/libclang_rt.builtins-wasm32.a", "/wasi-sysroot/lib/wasm32-wasi/crt1.o", "m.o", "-lc", "-lc++", "-lc++abi",'-o', 'm.wasm']);
-			const instance = await runWasix(await WebAssembly.compile(l.FS.readFile('m.wasm')), {});
-			const stdin = instance.stdin?.getWriter();
-			xterm.onData(data => {
-		    if (data === '\r') {
-		        xterm.write('\r\n');
-		        stdin?.write(encoder.encode('\n'));
-		    } else if (data.charCodeAt(0) === 127) {
-		        xterm.write('\b \b');
-		        stdin?.write(encoder.encode('\b'));
-		    } else {
-		        xterm.write(data);
-		        stdin?.write(encoder.encode(data));
-		    }
+			try {
+				buttonState = 'running';
+				xterm.reset();
+			let c = await clang({
+				'print': function(text) { xterm.writeln(text) },
+				'printErr': function(text) { xterm.writeln(text) }
 			});
+				c.FS.writeFile("m.cpp", view.state.doc.toString())
+				c.callMain(["-cc1", "-emit-obj", "-disable-free", "-fcolor-diagnostics", "-I", "/wasi-sysroot/include/c++/v1", "-I", "/wasi-sysroot/include", "-I", "/wasi-sysroot/lib/clang/18/include", "-Oz", "m.cpp", "-o", "m.o", "-x", "c++"]);
+
+			let l = await lld({
+				"thisProgram": "wasm-ld",
+				'print': function(text) { xterm.writeln(text) },
+				'printErr': function(text) { xterm.writeln(text) }
+			});
+				l.FS.writeFile('m.o', c.FS.readFile('m.o'));
+				l.callMain(["-L/wasi-sysroot/lib/wasm32-wasi/","/wasi-sysroot/lib/wasi/libclang_rt.builtins-wasm32.a", "/wasi-sysroot/lib/wasm32-wasi/crt1.o", "m.o", "-lc", "-lc++", "-lc++abi",'-o', 'm.wasm']);
+				const instance = await runWasix(await WebAssembly.compile(l.FS.readFile('m.wasm')), {});
+				const stdin = instance.stdin?.getWriter();
+				xterm.onData(data => {
+			    if (data === '\r') {
+			        xterm.write('\r\n');
+			        stdin?.write(encoder.encode('\n'));
+			    } else if (data.charCodeAt(0) === 127) {
+			        xterm.write('\b \b');
+			        stdin?.write(encoder.encode('\b'));
+			    } else {
+			        xterm.write(data);
+			        stdin?.write(encoder.encode(data));
+			    }
+				});
 
 
-			instance.stdout.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
-			instance.stderr.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
-			await instance.wait();
+				instance.stdout.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
+				instance.stderr.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
+				await instance.wait();
+			} catch(e) {}
 			buttonState = 'ready';
 		}
 });
