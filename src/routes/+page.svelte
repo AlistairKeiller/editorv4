@@ -107,13 +107,13 @@
 		xterm.writeln(
 			[
 				'',
-				'    Basicly All Native (BAN) is a C++ IDE that attempts to combine the',
+				'    C Native Editor (CNEditor) is a C++ IDE that attempts to combine the',
 				'    power of a full fledged a editor with the ease of use of the browser',
 				'',
 				' ┌ \x1b[1mFeatures\x1b[0m ──────────────────────────────────────────────────────────────────┐',
 				' │                                                                            │',
 				' │  \x1b[31;1mCollaboration just works                \x1b[32mPerformance\x1b[0m                       │',
-				' │  Just use the share button               BAN uses codemirror 6, xterm.js   │',
+				' │  Just use the share button               CNeditor uses codemirror, xterm.js│',
 				' │                                          SvelteKit, yjs, and WebAssembly   │',
 				' │                                                                            │',
 				' │  \x1b[33;1mAccessible                              \x1b[34mEasy to use\x1b[0m                       │',
