@@ -148,7 +148,20 @@
 			l.callMain(["-L/wasi-sysroot/lib/wasm32-wasi/","/wasi-sysroot/lib/wasi/libclang_rt.builtins-wasm32.a", "/wasi-sysroot/lib/wasm32-wasi/crt1.o", "m.o", "-lc", "-lc++", "-lc++abi",'-o', 'm.wasm']);
 			const instance = await runWasix(await WebAssembly.compile(l.FS.readFile('m.wasm')), {});
 			const stdin = instance.stdin?.getWriter();
-			xterm.onData(data => stdin?.write(encoder.encode(data)));
+			xterm.onData(data => {
+		    if (data === '\r') {
+		        xterm.write('\r\n');
+		        stdin?.write(encoder.encode('\n'));
+		    } else if (data.charCodeAt(0) === 127) {
+		        xterm.write('\b \b');
+		        stdin?.write(encoder.encode('\b'));
+		    } else {
+		        xterm.write(data);
+		        stdin?.write(encoder.encode(data));
+		    }
+			});
+
+
 			instance.stdout.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
 			instance.stderr.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
 			await instance.wait();
