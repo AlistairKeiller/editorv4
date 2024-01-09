@@ -1,11 +1,15 @@
+<div align="center">
+<img src="CNEditor.svg" width="256px" />
+</div>
+
 ```
-    Basicly All Native (BAN) is a C++ IDE that attempts to combine the
+    C++ Native Editor (CNEditor) is a C++ IDE that attempts to combine the
     power of a full fledged a editor with the ease of use of the browser
 
  ┌ Features ──────────────────────────────────────────────────────────────────┐
  │                                                                            │
  │  Collaboration just works                Performance                       │
- │  Just use the share button               BAN uses codemirror 6, xterm.js   │
+ │  Just use the share button               CNeditor uses codemirror, xterm.js│
  │                                          SvelteKit, yjs, and WebAssembly   │
  │                                                                            │
  │  Accessible                              Easy to use                       │
