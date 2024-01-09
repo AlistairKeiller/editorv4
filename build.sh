@@ -13,4 +13,9 @@ emcmake cmake -S llvm-project/llvm -B llvm-project/build -G Ninja \
   -DLLVM_CCACHE_BUILD=ON \
   -DLLVM_CCACHE_DIR=/tmp/ccache
 ninja -C llvm-project/build -- clang lld
+rm src/lib/clang.mjs src/lib/clang.wasm src/lib/lld.mjs src/lib/lld.wasm
+cp llvm-project/build/bin/clang.js src/lib/clang.mjs
+cp llvm-project/build/bin/clang.wasm src/lib/clang.wasm
+cp llvm-project/build/bin/lld.js src/lib/lld.mjs
+cp llvm-project/build/bin/lld.wasm src/lib/lld.wasm
 # /build/lib/clang/18/include

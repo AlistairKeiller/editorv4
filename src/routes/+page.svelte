@@ -125,16 +125,6 @@
 			fitAddon.fit();
 		};
 
-
-		let c = await clang({
-			'print': function(text) { xterm.writeln(text) },
-			'printErr': function(text) { xterm.writeln(text) }
-		});
-		let l = await lld({
-			"thisProgram": "wasm-ld",
-			'print': function(text) { xterm.writeln(text) },
-			'printErr': function(text) { xterm.writeln(text) }
-		});
 		await init();
 		const encoder = new TextEncoder();
 		buttonState = 'ready';
@@ -142,9 +132,18 @@
 		readyClicked = async function () {
 			buttonState = 'running';
 			xterm.reset();
+		let c = await clang({
+			'print': function(text) { xterm.writeln(text) },
+			'printErr': function(text) { xterm.writeln(text) }
+		});
 			c.FS.writeFile("m.cpp", view.state.doc.toString())
 			c.callMain(["-cc1", "-emit-obj", "-disable-free", "-fcolor-diagnostics", "-I", "/wasi-sysroot/include/c++/v1", "-I", "/wasi-sysroot/include", "-I", "/wasi-sysroot/lib/clang/18/include", "-Oz", "m.cpp", "-o", "m.o", "-x", "c++"]);
 
+		let l = await lld({
+			"thisProgram": "wasm-ld",
+			'print': function(text) { xterm.writeln(text) },
+			'printErr': function(text) { xterm.writeln(text) }
+		});
 			l.FS.writeFile('m.o', c.FS.readFile('m.o'));
 			l.callMain(["-L/wasi-sysroot/lib/wasm32-wasi/","/wasi-sysroot/lib/wasi/libclang_rt.builtins-wasm32.a", "/wasi-sysroot/lib/wasm32-wasi/crt1.o", "m.o", "-lc", "-lc++", "-lc++abi",'-o', 'm.wasm']);
 			const instance = await runWasix(await WebAssembly.compile(l.FS.readFile('m.wasm')), {});
