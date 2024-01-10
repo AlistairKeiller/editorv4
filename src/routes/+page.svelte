@@ -125,6 +125,15 @@
 		fit = function () {
 			fitAddon.fit();
 		};
+		xterm.onData(data => {
+	    if (data === '\r') {
+	        xterm.write('\r\n');
+	    } else if (data.charCodeAt(0) === 127) {
+	        xterm.write('\b \b');
+	    } else {
+	        xterm.write(data);
+	    }
+		});
 
 		await init();
 		const encoder = new TextEncoder();
@@ -151,16 +160,7 @@
 				const instance = await runWasix(await WebAssembly.compile(l.FS.readFile('m.wasm')), {});
 				const stdin = instance.stdin?.getWriter();
 				xterm.onData(data => {
-			    if (data === '\r') {
-			        xterm.write('\r\n');
-			        stdin?.write(encoder.encode('\n'));
-			    } else if (data.charCodeAt(0) === 127) {
-			        xterm.write('\b \b');
-			        stdin?.write(encoder.encode('\b'));
-			    } else {
-			        xterm.write(data);
-			        stdin?.write(encoder.encode(data));
-			    }
+	        stdin?.write(encoder.encode(data));
 				});
 
 
