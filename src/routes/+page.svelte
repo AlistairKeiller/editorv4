@@ -182,7 +182,7 @@
 }
 </style>
 
-<div class="grid h-screen grid-cols-2 grid-rows-[1fr_17fr] gap-1 bg-[#20232a]">
+<div class="grid h-screen grid-cols-2 grid-rows-[56px_auto] gap-1 bg-[#20232a]">
 	<div class="col-span-full flex justify-center mt-1">
 		{#if buttonState == 'ready'}
 			<button
