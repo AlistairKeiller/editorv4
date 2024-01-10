@@ -125,15 +125,17 @@
 		fit = function () {
 			fitAddon.fit();
 		};
-		xterm.onData(data => {
-	    if (data === '\r') {
+		function writeToXterm(data) {
+			console.log(data)
+	    if (data === '\r' || data == '\n') {
 	        xterm.write('\r\n');
 	    } else if (data.charCodeAt(0) === 127) {
 	        xterm.write('\b \b');
 	    } else {
 	        xterm.write(data);
 	    }
-		});
+		}
+		xterm.onData(writeToXterm);
 
 		await init();
 		const encoder = new TextEncoder();
@@ -164,8 +166,8 @@
 				});
 
 
-				instance.stdout.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
-				instance.stderr.pipeTo(new WritableStream({ write: chunk => xterm.write(chunk) }));
+				instance.stdout.pipeTo(new WritableStream({ write: chunk => {chunk.forEach((c) => writeToXterm(String.fromCharCode(c)))} }));
+				instance.stderr.pipeTo(new WritableStream({ write: chunk => {chunk.forEach((c) => writeToXterm(String.fromCharCode(c)))} }));
 				await instance.wait();
 			} catch(e) {}
 			buttonState = 'ready';
